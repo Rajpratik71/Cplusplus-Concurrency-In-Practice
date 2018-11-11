@@ -1,50 +1,40 @@
+/*
+ *decltype 和 auto 一起使用会更为有用，因为 auto 参数的类型只有编译器知道。
+ *然而 decltype 对于那些大量运用运算符重载和特化的类型的代码的表示也非常有用。
+ */
 #include <iostream>
-#include <vector>
-#include <initializer_list>
+#include <cmath>
+#include <typeinfo>
  
-template <class T>
-struct S {
-    std::vector<T> v;
-    S(std::initializer_list<T> l) : v(l) {
-         std::cout << "constructed with a " << l.size() << "-element list\n";
-    }
-    void append(std::initializer_list<T> l) {
-        v.insert(v.end(), l.begin(), l.end());
-    }
-    std::pair<const T*, std::size_t> c_arr() const {
-        return {&v[0], v.size()};  // list-initialization in return statement
-                                   // this is NOT a use of std::initializer_list
-    }
-};
+template<class T, class U>
+auto add(T t, U u) -> decltype(t + u) // the return type of add is the type of operator+(T,U)
+{
+    return t + u;
+}
  
-template <typename T>
-void templated_fn(T) {}
+auto get_fun(int arg)->double(*)(double) // same as double (*get_fun(int))(double)
+{
+    switch (arg) {
+        case 1: return std::fabs;
+        case 2: return std::sin;
+        default: return std::cos;
+    }
+}
  
 int main()
 {
-    S<int> s = {1, 2, 3, 4, 5}; // direct list-initialization
-    s.append({6, 7, 8});        // list-initialization in function call
+    auto a = 1 + 2;
+    std::cout << "type of a: " << typeid(a).name() << '\n';
+    auto b = add(1, 1.2);
+    std::cout << "type of b: " << typeid(b).name() << '\n';
+    //auto int c; //compile-time error
+    auto d = {1, 2};
+    std::cout << "type of d: " << typeid(d).name() << '\n';
  
-    std::cout << "The vector size is now " << s.c_arr().second << " ints:\n";
-
-	for (auto n : s.v) std::cout << ' ' << n;
-	for (auto &n : s.v) std::cout << ' ' << n;
-    for (auto &&n : s.v) std::cout << ' ' << n;
+    auto my_lambda = [](int x) { return x + 3; };
+    std::cout << "my_lambda: " << my_lambda(5) << '\n';
  
-    std::cout << '\n';
- 
-    std::cout << "range-for over brace-init-list: \n";
- 
-    for (int x : {-1, -2, -3}) // the rule for auto makes this ranged for work
-        std::cout << x << ' ';
-    std::cout << '\n';
- 
-    auto al = {10, 11, 12};   // special rule for auto
- 
-    std::cout << "The list bound to auto has size() = " << al.size() << '\n';
- 
-    // templated_fn({1, 2, 3}); // compiler error! "{1, 2, 3}" is not an expression,
-                                // it has no type, and so T cannot be deduced
-    templated_fn<std::initializer_list<int>>({1, 2, 3}); // OK
-    templated_fn<std::vector<int>>({1, 2, 3});           // also OK
+    auto my_fun = get_fun(2);
+    std::cout << "type of my_fun: " << typeid(my_fun).name() << '\n';
+    std::cout << "my_fun: " << my_fun(3) << '\n';
 }
