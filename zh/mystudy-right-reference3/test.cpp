@@ -103,6 +103,9 @@ int main()
     MyString str1 = "hello";
 	//MyString str2(str1);
 	MyString str3 = Fun();
+	//move是将对象的状态或者所有权从一个对象转移到另一个对象，只是转义，没有内存拷贝。
 	MyString str4 = move(str1);
+	//forward将左值转换为右值
+	MyString str5(forward<MyString>(str3));
 	return 0;
 }
