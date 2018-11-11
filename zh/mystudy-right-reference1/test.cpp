@@ -10,13 +10,15 @@ public:
 	char c[256];
 };
 
-void f(A a)
+void f(A &a)
 {
 	cout << a.b <<endl;
+	a.b = 13;
 }
 int main(int argc, char const *argv[])
 {
 	A &&a = A();
 	a.b = 12;
 	f(a);
+	cout << a.b <<endl;
 }
