@@ -18,7 +18,8 @@ std::stringstream stream;
 
 void append_numer(int x)
 {
-  while (lock.test_and_set());
+  while (lock.test_and_set())
+      ;
   stream << "thread#" << x << "\n";
   lock.clear();
 }
